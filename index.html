@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="application/javascript">
+      ( function() {
+          function init() {
+            function debug(string) {
+              var element = document.getElementById("debug");
+              var p = document.createElement("p");
+              p.appendChild(document.createTextNode(string));
+              element.appendChild(p);
+            }
+
+            var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+            ws = new Socket("ws://192.168.0.101:8080/foo/bar?hello=world");
+            ws.onmessage = function(evt) {
+              debug("Received: " + evt.data);
+            };
+            ws.onclose = function(event) {
+              debug("Closed - code: " + event.code + ", reason: " + event.reason + ", wasClean: " + event.wasClean);
+            };
+            ws.onopen = function() {
+              debug("connected...");
+              // ws.send("hello server");
+              // ws.send("hello again");
+            };
+          };
+          
+          init();
+
+          var mouse_capture = function(event) {
+            var msg = event.pageX + "," + event.pageY;
+            ws.send(msg);
+            console.log(msg)
+          };
+
+          var start_capture = function() {
+            console.log('Starting mouse move capture');
+            $('#capture-active').html('Activo');
+            $(document).on('mousemove.Capture', mouse_capture);
+            // setTimeout(function() {
+              // stop_capture()
+            // }, 10000);
+          }
+          var stop_capture = function() {
+            console.log('Stoping mouse move capture');
+            $(document).off('mousemove.Capture');
+            $('#capture-active').html('Inactivo');
+          }
+
+          $(document).on('click', '.start-capture', start_capture);
+          $(document).on('click', '.stop-capture', stop_capture);
+
+        }());
+    </script>
+  </head>
+  <body>
+    <button class="start-capture">
+      Start Capture
+    </button>
+    <button class="stop-capture">
+      Stop Capture
+    </button>
+    <div id='capture-active'>
+      Inactivo
+    </div>
+  </body>
+</html>
